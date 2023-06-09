@@ -1,8 +1,9 @@
 import numpy as np
 from keras.layers import Input, Conv2D, Conv2DTranspose, Flatten, Dense, Activation, LeakyReLU, BatchNormalization, Dropout, Reshape
 from keras.models import Model
-from keras.backend import int_shape
+from keras.backend import int_shape,mean,square
 from keras.utils import plot_model
+from keras.callbacks import ModelCheckpoint
 from keras.optimizers import Adam,RMSprop,Adadelta,Adagrad
 
 class AutoEncoder():
@@ -90,15 +91,16 @@ class AutoEncoder():
             model_output_layer = self.decoder(encoder_output_layer)
 
             self.model = Model(model_input_layer,model_output_layer)
-    
 
-
-
-
-
-
+    def compile(self, eta):
+            self.eta = eta
             
-
-
-
-
+            Optimizer = Adam(learning_rate=eta)
+            
+            def RMSE_loss(y,y_hat):
+                    '''
+                    Here the loss is RMSE
+                    '''
+                    return mean(square(y - y_hat),axis=[1,2,3])
+            
+            self.model.compile(optimizer=Optimizer, loss=RMSE_loss)
