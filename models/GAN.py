@@ -2,7 +2,7 @@ import numpy as np
 from keras.layers import Input,Conv2D,Conv2DTranspose,Flatten,Dense,BatchNormalization,Dropout
 from keras.layers import ReLU,LeakyReLU,Activation,UpSampling2D,ZeroPadding2D,Reshape
 from keras.models import Model
-from keras.optimizers import Adam
+from keras.optimizers import RMSprop
 import keras.backend as K
 from keras.initializers import RandomNormal
 
@@ -75,5 +75,15 @@ class GAN:
 
         gen_output = x
         self.generator = Model(gen_input,gen_output)
-                        
+    
+    def build_adversarial(self):
+        self.discriminator.compile(optimizer=RMSprop(learning_rate=0.0005),loss='binary_crossentropy',metrics=['accuracy'])
+        self.discriminator.trainable = False
+        model_input = Input(shape=(self.latent_dim,),name='Model_Input')
+        model_output = self.discriminator(self.generator(model_input))
+        self.model = Model(model_input,model_output)
+        self.model.compile(optimizer = RMSprop(learning_rate=0.0005),loss='binary_crossentropy',metrics=['accuracy'])
+        self.discriminator.trainiable = True
+        
+    
 
